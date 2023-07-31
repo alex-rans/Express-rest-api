@@ -1,0 +1,68 @@
+<%- include('shared/header'); -%>
+<body>
+    <h1>Persons</h1>
+    <% if (locals.id) { %>
+        <p>Welcome <%= user.name %></p>
+        <ul id="persons">
+        </ul>
+        <p>Submitting form with form post request</p>
+    <form action="/person/create" method="post">
+        <input type="text" name="name" id="name" placeholder="Name">
+        <input type="text" name="surname" id="surname" placeholder="Surname">
+        <input type="number" name="age" id="age" placeholder="age">
+        <select id="gender" name="gender">
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+        </select>
+        <button type="submit">Submit</button>
+    </form>
+
+    <p>Submitting form with ajax</p>
+    <form id="ajaxform">
+        <input type="text" name="name" id="name" placeholder="Name">
+        <input type="text" name="surname" id="surname" placeholder="Surname">
+        <input type="number" name="age" id="age" placeholder="age">
+        <select id="gender" name="gender">
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+        </select>
+        <input type="submit"/>
+    </form>
+    <a href="/logout">logout</a>
+      <% } else { %>
+        <!-- I could use middleware here to automatically redirect to login page, but I wanted to try EJS ifs and elses -->
+    <p>Please log in to view data</p>
+    <a href="/login">Login</a>
+    <% }%>
+</body>
+<%- include('shared/scripts_after'); -%>
+<% if (locals.id) { %>
+<script>
+    function getPerson() {
+        $('#persons').empty();
+        $.getJSON('/persons').done((data) => {
+            $.each(data, (key, value) => {
+                let txt = `<li><a href="/person/${value.id}">${value.name} ${value.surname}</a>`
+                $('#persons').append(txt);
+            });
+        });
+    };
+    $('document').ready(() => {
+        getPerson();
+    });
+
+    $('#ajaxform').submit((e) => {
+    e.preventDefault();
+    $.ajax({
+        url: '/person/create',
+        type: 'post',
+        data:$('#ajaxform').serialize(),
+        success:() => {
+            getPerson();
+        }
+    });
+});
+    
+</script>
+<% } %>
+</html>
